@@ -1,0 +1,8 @@
+<html>
+    <head>
+        <title>File</title>
+    </head>
+    <body>
+        <a href="test.txt">Click here</a>
+    </body>
+</html>
