@@ -1,27 +1,30 @@
-import os
-import shutil
-from datetime import datetime
-source_dir = 'source_directory'
-dest_dirs = {
-    '.txt': 'TextFiles',
-    '.csv': 'CSVFiles',
-    '.pdf': 'PDFFiles'
+#!/bin/bash
+source_dir="source_directory"
+declare -A dest_dirs=(
+    [".txt"]="TextFiles"
+    [".csv"]="CSVFiles"
+    [".pdf"]="PDFFiles"
+    # Add more file extensions and corresponding directories as needed
+)
+for dest_dir in "${dest_dirs[@]}"; do
+    if [ ! -d "$dest_dir" ]; then
+        mkdir -p "$dest_dir"
+    fi
+done
+organize_files() {
+    local src_dir=$1
+    local -n dest_arr=$2
+    for file in "$src_dir"/*; do
+        if [ -f "$file" ]; then
+            ext="${file##*.}"
+            if [ "${dest_arr[$ext]+isset}" ]; then
+                timestamp=$(date +"%Y%m%d%H%M%S")
+                new_name="${timestamp}_$(basename "$file")"
+                dest="${dest_arr[$ext]}"
+                mv "$file" "$dest/$new_name"
+echo "Moved $(basename "$file") to $dest/$new_name"
+            fi
+        fi
+    done
 }
-
-for dest_dir in dest_dirs.values():
-    if not os.path.exists(dest_dir):
-        os.makedirs(dest_dir)
-def organize_files(source_dir, dest_dirs):
-    for filename in os.listdir(source_dir):
-        if os.path.isfile(os.path.join(source_dir, filename)):
-            file_ext = os.path.splitext(filename)[1]
-            if file_ext in dest_dirs:
-                source_file = os.path.join(source_dir, filename)
-                dest_dir = dest_dirs[file_ext]
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                new_filename = f"{timestamp}_{filename}"
-                dest_file = os.path.join(dest_dir, new_filename)
-                shutil.move(source_file, dest_file)
-                print(f"Moved {filename} to {dest_file}")
-
-organize_files(source_dir, dest_dirs)
+organize_files "$source_dir" dest_dirs
